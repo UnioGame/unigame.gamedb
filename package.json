@@ -18,6 +18,6 @@
   "dependencies": {
     "com.unigame.coremodules": "https://github.com/UnioGame/UniGame.CoreModules.git",
     "com.cysharp.unitask" : "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-    "com.unity.nuget.newtonsoft-json": "3.0.2",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }
