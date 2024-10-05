@@ -1,0 +1,23 @@
+{
+  "name": "com.unigame.gamedb",
+  "author": "UniGame",
+  "displayName": "Game Runtime Database",
+  "description": "Configurable game resource database",
+  "unity": "2022.1",
+  "version": "2024.0.13",
+  "homepage": "https://github.com/UnioGame/UniGame.GameDB/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UnioGame/UniGame.GameDB"
+  },
+  "keywords": [
+    "db",
+    "database",
+    "gamedb"
+  ],
+  "dependencies": {
+    "com.unigame.coremodules": "https://github.com/UnioGame/UniGame.CoreModules.git",
+    "com.cysharp.unitask" : "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.unity.nuget.newtonsoft-json": "3.0.2",
+  }
+}
