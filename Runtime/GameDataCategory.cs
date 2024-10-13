@@ -3,37 +3,69 @@
     using System;
     using System.Collections.Generic;
     using Abstract;
+    using Cysharp.Threading.Tasks;
     using Sirenix.OdinInspector;
+    using UniGame.Core.Runtime;
     using UnityEngine;
 
     public abstract class GameDataCategory : ScriptableObject, IGameDataCategory
     {
-        public string category;
+        public const string SettingsGroupKey = "settings";
+        public const string CategoryGroupKey = "category";
+
+        #region inspector
         
+        [TabGroup(CategoryGroupKey)]
+        public string category;
+
+        [TabGroup(SettingsGroupKey)]
+        public bool useAssetResourceProvider = false;
+        
+        [TabGroup(SettingsGroupKey)]
+        [HideIf(nameof(useAssetResourceProvider))]
+        [SerializeReference]
+        public IGameResourceProvider resourceProvider = new AddressableResourceProvider();
+        
+        [TabGroup(SettingsGroupKey)]
         [InlineEditor()]
+        [ShowIf(nameof(useAssetResourceProvider))]
         public GameResourceLocation resourceLocation;
+        
+        #endregion
+        
+        private Dictionary<string, IGameResourceRecord> _records;
 
         public virtual string Category => category;
+        
+        public virtual IGameResourceProvider ResourceProvider => resourceProvider;
 
-        public IGameResourceLocation ResourceLocation => resourceLocation;
+        public abstract Dictionary<string, IGameResourceRecord> Map { get; }
 
-        public abstract IReadOnlyList<IGameDatabaseRecord> Records { get; }
+        public abstract IGameResourceRecord[] Records { get; }
+        
+        public abstract UniTask<CategoryInitializeResult> InitializeAsync(ILifeTime lifeTime);
 
-        public virtual IGameDatabaseRecord Find(string id)
+        public virtual bool Has(string id) => Find(id) != EmptyRecord.Value;
+        
+        public abstract IGameResourceRecord Find(string filter);
+        
+        public abstract IGameResourceRecord[] FindResources(string filter);
+        
+
+        public virtual IReadOnlyList<IGameResourceRecord> FillCategory()
         {
-            foreach (var record in Records)
-            {
-                if (record.Id.Equals(id, StringComparison.OrdinalIgnoreCase))
-                    return record;
-                if(record.Name.Equals(id, StringComparison.OrdinalIgnoreCase))
-                    return record;
-            }
-
-            return EmptyRecord.Value;
+            return new List<IGameResourceRecord>();
         }
 
-        [Button(ButtonSizes.Large, Icon = SdfIconType.ArchiveFill)]
-        public virtual void FillCategory() { }
+#if UNITY_EDITOR
+
+        [Button(ButtonSizes.Large,Icon = SdfIconType.ArchiveFill)]
+        public virtual void UpdateCategory()
+        {
+            FillCategory();
+        }
+        
+#endif
 
     }
 }

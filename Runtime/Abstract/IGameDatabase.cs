@@ -1,8 +1,10 @@
 namespace Game.Code.DataBase.Runtime.Abstract
 {
-    public interface IGameDatabase : IGameResourceLocation
+    using Cysharp.Threading.Tasks;
+    using UniGame.Core.Runtime;
+
+    public interface IGameDatabase : IGameResourceProvider
     {
-
-
+        UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, ILifeTime lifeTime);
     }
 }

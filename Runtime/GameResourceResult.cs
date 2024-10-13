@@ -14,7 +14,7 @@
             Result = null
         };
         
-        public Object Result;
+        public object Result;
         public bool Complete;
         public string Error;
         public Exception Exception;

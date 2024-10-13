@@ -1,17 +1,17 @@
 namespace Game.Code.DataBase.Runtime
 {
     using System;
+    using System.Collections.Generic;
     using Abstract;
-    using UnityEngine;
     using UnityEngine.AddressableAssets;
 
     [Serializable]
-    public class AddressablesObjectRecord : IGameDatabaseRecord
+    public class AddressablesObjectRecord : IGameResourceRecord
     {
-        [SerializeField]
-        public AssetReference assetReference;
-
         public string name;
+        public AssetReference assetReference;
+        public string[] labels = Array.Empty<string>();
+        
 
         public string Id => assetReference.AssetGUID;
 
@@ -28,12 +28,33 @@ namespace Game.Code.DataBase.Runtime
             }
         }
 
+        public bool CheckRecord(string filter)
+        {
+            if(string.IsNullOrEmpty(filter)) return false;
+            if (!assetReference.RuntimeKeyIsValid()) return false;
+            if (assetReference.AssetGUID.Equals(filter, StringComparison.OrdinalIgnoreCase)) return true;
+            foreach (var label in labels)
+            {
+                if (label.Equals(filter, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
         public bool IsMatch(string searchString)
         {
             if (string.IsNullOrEmpty(searchString)) return true;
             if (Id != null && Id.IndexOf(searchString,StringComparison.OrdinalIgnoreCase) >= 0) return true;
             if (Name != null && Name.IndexOf(searchString,StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            foreach (var label in labels)
+            {
+                if (label.IndexOf(searchString,StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
             return false;
         }
+        
+        
+        
     }
 }

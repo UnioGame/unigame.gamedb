@@ -1,19 +1,27 @@
 ﻿namespace Game.Code.DataBase.Runtime
 {
     using System;
+    using Abstract;
     using Cysharp.Threading.Tasks;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
-    using UnityEngine;
+    using Object = UnityEngine.Object;
 
-    [CreateAssetMenu(menuName = "Game/GameDatabase/Locations/"+nameof(AddressablesResourceLocation),fileName = nameof(AddressablesResourceLocation))]
-    public class AddressablesResourceLocation : GameResourceLocation
+    [Serializable]
+    public class AddressableResourceProvider : IGameResourceProvider
     {
-        public static Type ComponentType = typeof(Component);
+        public Type unityObjectType = typeof(Object);
         
-        public override async UniTask<GameResourceResult> LoadAsync<TAsset>(string resource,ILifeTime lifeTime)
+        public bool IsValidResourceSource(string resource, Type resourceType)
         {
-            var addressableResult = await resource.LoadAssetTaskAsync<TAsset>(lifeTime);
+            var isUnityObject = unityObjectType.IsAssignableFrom(resourceType);
+            return isUnityObject;
+        }
+
+        public async UniTask<GameResourceResult> LoadAsync<TResult>(string resource,ILifeTime lifeTime)
+        {
+            var addressableResult = await resource
+                .LoadAssetTaskAsync<TResult>(lifeTime);
 
             var result = new GameResourceResult()
             {
@@ -25,7 +33,6 @@
             
             return result;
         }
-
     }
 
 }
