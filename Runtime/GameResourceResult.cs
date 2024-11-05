@@ -1,7 +1,6 @@
 ﻿namespace Game.Code.DataBase.Runtime
 {
     using System;
-    using Object = UnityEngine.Object;
 
     [Serializable]
     public struct GameResourceResult

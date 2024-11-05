@@ -16,7 +16,6 @@
 #if UNITY_EDITOR
     using UniModules.Editor;
     using UniModules.UniGame.AddressableExtensions.Editor;
-    using UnityEditor;
 #endif
     
     [CreateAssetMenu(menuName = "Game/GameDatabase/Addressable Category",
