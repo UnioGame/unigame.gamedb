@@ -32,7 +32,7 @@ namespace Game.Code.DataBase.Runtime
         [InlineEditor()]
         public List<GameResourceLocation> fallBackLocations = new();
 
-        [BoxGroup("categories")]
+        [TabGroup(DatabaseKey)]
         [InlineProperty]
         public List<AssetReferenceT<GameDataCategory>> categories = new();
 
