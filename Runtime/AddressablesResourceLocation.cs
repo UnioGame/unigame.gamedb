@@ -10,6 +10,8 @@
     [Serializable]
     public class AddressableResourceProvider : IGameResourceProvider
     {
+        public const string LoadingError = "Asset {0} not found";
+        
         public Type unityObjectType = typeof(Object);
         
         public bool IsValidResourceSource(string resource, Type resourceType)
@@ -23,12 +25,14 @@
             var addressableResult = await resource
                 .LoadAssetTaskAsync<TResult>(lifeTime);
 
+            var error = addressableResult == null ? string.Format(LoadingError, resource) : string.Empty;
+            
             var result = new GameResourceResult()
             {
-                Complete = addressableResult.Complete,
-                Error = addressableResult.Error,
-                Exception = addressableResult.Exception,
-                Result = addressableResult.Result
+                Complete = addressableResult!=null,
+                Error = error,
+                Exception = null,
+                Result = addressableResult
             };
             
             return result;
