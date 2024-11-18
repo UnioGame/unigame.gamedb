@@ -31,8 +31,6 @@
         public GameResourceLocation resourceLocation;
         
         #endregion
-        
-        private Dictionary<string, IGameResourceRecord> _records;
 
         public virtual string Category => category;
         
