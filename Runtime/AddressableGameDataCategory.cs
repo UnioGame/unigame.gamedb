@@ -8,12 +8,12 @@
     using Cysharp.Threading.Tasks;
     using Sirenix.OdinInspector;
     using UniGame.Core.Runtime;
-    
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
+    using UnityEditor.AddressableAssets;
     using UniModules.Editor;
     using UniModules.UniGame.AddressableExtensions.Editor;
 #endif
@@ -130,39 +130,41 @@
             
             var regexps = filterData.regex
                 .Select(x => new Regex(x)).ToArray();
-            var assets = AssetEditorTools
-                .GetAssetsInfo(typeof(Object),string.Empty,filterData.folders);
-            
-            foreach (var info in assets)
+
+            var addressableSettings = AddressableAssetSettingsDefaultObject.Settings;
+            var groups = addressableSettings.groups;
+
+            foreach (var assetGroup in groups)
             {
-                var asset = info.asset;
-                if(!asset.IsInAnyAddressableAssetGroup())continue;
-                var labels = asset.GetAddressableLabels();
-                
-                if(!ValidateLabels(labels)) continue;
-                if(!ValidateRegExp(info,regexps)) continue;
-                
-                var entry = new AddressablesObjectRecord()
+                foreach (var assetEntry in assetGroup.entries)
                 {
-                    name = asset.name,
-                    assetReference = new AssetReference(info.guid),
-                    labels = labels.ToArray(),
-                };
+                    var asset = assetEntry.TargetAsset;
+ 
+                    if(!ValidateLabels(assetEntry.labels)) continue;
+                    if(!ValidateRegExp(assetEntry.AssetPath,regexps)) continue;
                 
-                records.Add(entry);
+                    var entry = new AddressablesObjectRecord()
+                    {
+                        name = asset.name,
+                        assetReference = new AssetReference(assetEntry.guid),
+                        labels = assetEntry.labels.ToArray(),
+                    };
+                
+                    records.Add(entry);
+                }
             }
 
             return records;
         }
 
-        public bool ValidateRegExp(AssetEditorInfo info, Regex[] regexps)
+        public bool ValidateRegExp(string path, Regex[] regexps)
         {
             if (regexps.Length == 0)
                 return true;
             
             foreach (var regex in regexps)
             {
-                if (regex.IsMatch(info.path))
+                if (regex.IsMatch(path))
                     return true;
             }
 
