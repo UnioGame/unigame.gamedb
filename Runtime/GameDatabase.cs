@@ -106,9 +106,11 @@ namespace Game.Code.DataBase.Runtime
             
             var resource = record.resource;
             var category = record.category;
-            var provider = category.ResourceProvider;
+            var provider = category?.ResourceProvider;
             
-            var loadFallBack = resource == EmptyRecord.Value || provider == null;
+            var loadFallBack = !record.success || 
+                               resource == EmptyRecord.Value || 
+                               provider == null;
             
             var assetResult = loadFallBack
                 ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
