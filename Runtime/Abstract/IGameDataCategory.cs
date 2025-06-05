@@ -10,7 +10,7 @@ namespace Game.Code.DataBase.Runtime.Abstract
         
         public IGameResourceProvider ResourceProvider { get; }
         
-        public IGameResourceRecord[] Records { get; }
+        public IReadOnlyList<IGameResourceRecord> Records { get; }
         
         public Dictionary<string,IGameResourceRecord> Map { get; }
         
@@ -20,7 +20,7 @@ namespace Game.Code.DataBase.Runtime.Abstract
         
         public IGameResourceRecord Find(string filter);
         
-        public IGameResourceRecord[] FindResources(string filter);
+        public IReadOnlyList<IGameResourceRecord> FindResources(string filter);
 
         /// <summary>
         /// editor only

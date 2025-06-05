@@ -38,7 +38,7 @@
 
         public abstract Dictionary<string, IGameResourceRecord> Map { get; }
 
-        public abstract IGameResourceRecord[] Records { get; }
+        public abstract IReadOnlyList<IGameResourceRecord> Records { get; }
         
         public abstract UniTask<CategoryInitializeResult> InitializeAsync(ILifeTime lifeTime);
 
@@ -46,8 +46,7 @@
         
         public abstract IGameResourceRecord Find(string filter);
         
-        public abstract IGameResourceRecord[] FindResources(string filter);
-        
+        public abstract IReadOnlyList<IGameResourceRecord> FindResources(string filter);
 
         public virtual IReadOnlyList<IGameResourceRecord> FillCategory()
         {

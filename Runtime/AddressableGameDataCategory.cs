@@ -30,7 +30,7 @@
         public AddressableFilterData filterData = new AddressableFilterData();
         
         private Dictionary<string, IGameResourceRecord> _map = new(128);
-        private Dictionary<string, IGameResourceRecord[]> _recordsMap = new(128);
+        private Dictionary<string, List<IGameResourceRecord>> _recordsMap = new(128);
         private Dictionary<string, IGameResourceRecord> _recordMap = new(128);
         
         private IGameResourceRecord[] _records;
@@ -38,7 +38,7 @@
 
         public override Dictionary<string, IGameResourceRecord> Map => _map;
         
-        public override IGameResourceRecord[] Records => _records;
+        public override IReadOnlyList<IGameResourceRecord> Records => _records;
         
         public override UniTask<CategoryInitializeResult> InitializeAsync(ILifeTime lifeTime)
         {
@@ -84,7 +84,7 @@
             return result;
         }
 
-        public override IGameResourceRecord[] FindResources(string filter)
+        public override IReadOnlyList<IGameResourceRecord> FindResources(string filter)
         {
             if (_recordsMap.TryGetValue(filter, out var cached))
                 return cached;
@@ -97,9 +97,9 @@
                 _collectionBuffer.Add(record);
             }
 
-            var array = _collectionBuffer.ToArray();
-            _recordsMap[filter] = array;
-            return array;
+            var items = _collectionBuffer.ToList();
+            _recordsMap[filter] = items;
+            return items;
         }
 
         public bool ValidateRecord(string filter, AddressablesObjectRecord record)
