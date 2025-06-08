@@ -6,7 +6,7 @@ namespace Game.Code.Services.GameDatabase
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
     using UniGame.Core.Runtime.Extension;
-    using UniGame.GameFlow.Runtime.Services;
+    using UniGame.Context.Runtime;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
 
@@ -17,13 +17,14 @@ namespace Game.Code.Services.GameDatabase
 
         protected sealed override async UniTask<IGameDataService> CreateInternalAsync(IContext context)
         {
+            var lifeTime = context.LifeTime;
             var databaseAsset = await _dataBaseAsset
-                .LoadAssetTaskAsync(LifeTime)
+                .LoadAssetTaskAsync(lifeTime)
                 .ToSharedInstanceAsync();
 
             var database = await databaseAsset
                 .gameDatabase
-                .Initialize(LifeTime);
+                .Initialize(lifeTime);
             
             context.Publish<IGameDatabase>(database);
 

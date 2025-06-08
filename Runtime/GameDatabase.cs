@@ -7,7 +7,7 @@ namespace Game.Code.DataBase.Runtime
     using Sirenix.OdinInspector;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
-    using UniModules.UniCore.Runtime.Utils;
+    using UniGame.Runtime.Utils;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
 
