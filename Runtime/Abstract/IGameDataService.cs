@@ -1,7 +1,7 @@
-﻿using UniGame.GameFlow.Runtime.Interfaces;
-
-namespace Game.Code.Services.GameDatabase
+﻿namespace UniGame.GameDB
 {
+    using UniGame.GameFlow.Runtime;
+
     public interface IGameDataService : IGameService
     {
     

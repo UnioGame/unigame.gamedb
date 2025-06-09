@@ -1,4 +1,4 @@
-﻿namespace Game.Code.Services.GameDatabase
+﻿namespace UniGame.GameDB
 {
     using System;
     using UniGame.UniNodes.GameFlow.Runtime;

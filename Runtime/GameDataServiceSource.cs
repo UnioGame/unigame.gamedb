@@ -1,11 +1,11 @@
-namespace Game.Code.Services.GameDatabase
+namespace UniGame.GameDB
 {
+    using Core.Runtime;
+    using Core.Runtime.Extension;
     using Cysharp.Threading.Tasks;
-    using DataBase.Runtime;
-    using DataBase.Runtime.Abstract;
+    using Game.Code.DataBase.Runtime;
+    using Game.Code.DataBase.Runtime.Abstract;
     using UniGame.AddressableTools.Runtime;
-    using UniGame.Core.Runtime;
-    using UniGame.Core.Runtime.Extension;
     using UniGame.Context.Runtime;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
