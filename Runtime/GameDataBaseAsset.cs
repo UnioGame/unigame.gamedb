@@ -2,8 +2,12 @@ namespace Game.Code.DataBase.Runtime
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Sirenix.OdinInspector;
+    using UniGame.Core.Runtime;
     using UnityEngine;
+    
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
     
 #if UNITY_EDITOR
     using UnityEditor;
@@ -14,9 +18,11 @@ namespace Game.Code.DataBase.Runtime
     public class GameDataBaseAsset : ScriptableObject
     {
 
-        [SerializeField]
+#if ODIN_INSPECTOR
         [InlineProperty]
         [HideLabel]
+#endif
+        [SerializeField]
         public GameDatabase gameDatabase;
         
 #if UNITY_EDITOR
@@ -79,8 +85,10 @@ namespace Game.Code.DataBase.Runtime
                 yield return record;
         }
 
+#if ODIN_INSPECTOR
         [Button(Icon = SdfIconType.ArchiveFill)]
         [PropertyOrder(-1)]
+#endif
         public void UpdateData()
         {
             foreach (var category in gameDatabase.categories)

@@ -3,10 +3,14 @@
     using System.Collections.Generic;
     using Abstract;
     using Cysharp.Threading.Tasks;
-    using Sirenix.OdinInspector;
+
     using UniGame.Core.Runtime;
     using UnityEngine;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
     public abstract class GameDataCategory : ScriptableObject, IGameDataCategory
     {
         public const string SettingsGroupKey = "settings";
@@ -14,20 +18,28 @@
 
         #region inspector
         
+#if ODIN_INSPECTOR
         [TabGroup(CategoryGroupKey)]
+#endif
         public string category;
 
+#if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)]
+#endif
         public bool useAssetResourceProvider = false;
         
+#if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)]
         [HideIf(nameof(useAssetResourceProvider))]
+#endif
         [SerializeReference]
         public IGameResourceProvider resourceProvider = new AddressableResourceProvider();
         
+#if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)]
         [InlineEditor()]
         [ShowIf(nameof(useAssetResourceProvider))]
+#endif
         public GameResourceLocation resourceLocation;
         
         #endregion
@@ -55,7 +67,9 @@
 
 #if UNITY_EDITOR
 
+#if ODIN_INSPECTOR
         [Button(ButtonSizes.Large,Icon = SdfIconType.ArchiveFill)]
+#endif
         public virtual void UpdateCategory()
         {
             FillCategory();

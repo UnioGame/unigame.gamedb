@@ -4,13 +4,16 @@ namespace Game.Code.DataBase.Runtime
     using System.Collections.Generic;
     using Abstract;
     using Cysharp.Threading.Tasks;
-    using Sirenix.OdinInspector;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
     using UniGame.Runtime.Utils;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
     [Serializable]
     public class GameDatabase : IGameDatabase
     {
@@ -19,21 +22,30 @@ namespace Game.Code.DataBase.Runtime
         
         #region inspector
 
+#if ODIN_INSPECTOR
         [TabGroup(DatabaseKey)]
+#endif
+
         public DbData dbData = new();
         
+#if ODIN_INSPECTOR
         [TabGroup(SettingsKey)]
+#endif
         [SerializeReference]
         public List<IGameResourceProvider> fallBack = new() {
             new AddressableResourceProvider(),
         };
         
+#if ODIN_INSPECTOR
         [TabGroup(SettingsKey)]
         [InlineEditor()]
+#endif
         public List<GameResourceLocation> fallBackLocations = new();
 
+#if ODIN_INSPECTOR
         [TabGroup(DatabaseKey)]
         [InlineProperty]
+#endif
         public List<AssetReferenceT<GameDataCategory>> categories = new();
 
         #endregion
@@ -253,8 +265,10 @@ namespace Game.Code.DataBase.Runtime
     [Serializable]
     public class DbData
     {
+#if ODIN_INSPECTOR
         [Searchable(FilterOptions = SearchFilterOptions.ISearchFilterableInterface)]
         [ListDrawerSettings(ListElementLabelName = nameof(DBRecord.recordId))]
+#endif
         public List<DBRecord> records = new();
     }
 

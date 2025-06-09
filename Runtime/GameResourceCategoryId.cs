@@ -1,12 +1,18 @@
 ﻿namespace Game.Code.DataBase.Runtime
 {
     using System;
-    using Sirenix.OdinInspector;
+
     using UnityEngine;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
+#if ODIN_INSPECTOR
     [InlineProperty]
-    [Serializable]
     [ValueDropdown("@Game.Code.DataBase.Runtime.GameDataBaseAsset.GetGameRecordCategories()")]
+#endif
+    [Serializable]
     public struct GameResourceCategoryId
     {
 

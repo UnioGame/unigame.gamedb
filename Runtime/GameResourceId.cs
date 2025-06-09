@@ -3,17 +3,27 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Sirenix.OdinInspector;
+    using UniGame.Core.Runtime;
 
-    [Serializable]
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
+#if ODIN_INSPECTOR
     [InlineProperty]
     [BoxGroup(nameof(GameResourceId))]
+#endif
+    [Serializable]
     public struct GameResourceId
     {
+#if ODIN_INSPECTOR
         [OnValueChanged(nameof(OnCategoryChanged))]
+#endif
         public GameResourceCategoryId categoryId;
         
+#if ODIN_INSPECTOR
         [ValueDropdown(nameof(GetCategoryIds))]
+#endif
         public GameResourceRecordId id;
 
         public static implicit operator string(GameResourceId v) => v.id;

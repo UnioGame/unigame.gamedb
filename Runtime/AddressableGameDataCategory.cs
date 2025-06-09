@@ -6,12 +6,15 @@
     using System.Text.RegularExpressions;
     using Abstract;
     using Cysharp.Threading.Tasks;
-    using Sirenix.OdinInspector;
     using UniGame.Core.Runtime;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using Object = UnityEngine.Object;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
 #if UNITY_EDITOR
     using UnityEditor.AddressableAssets;
     using UniModules.Editor;
@@ -22,11 +25,16 @@
         fileName = "Addressable Category Asset")]
     public class AddressableGameDataCategory : GameDataCategory, IGameDataCategory
     {
+#if ODIN_INSPECTOR
         [TabGroup(CategoryGroupKey)]
         [Searchable(FilterOptions = SearchFilterOptions.ISearchFilterableInterface)]
+#endif
+
         public List<AddressablesObjectRecord> records = new List<AddressablesObjectRecord>();
 
+#if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)]
+#endif
         public AddressableFilterData filterData = new AddressableFilterData();
         
         private Dictionary<string, IGameResourceRecord> _map = new(128);
