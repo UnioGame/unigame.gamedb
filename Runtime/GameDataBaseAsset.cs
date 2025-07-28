@@ -14,7 +14,7 @@ namespace Game.Code.DataBase.Runtime
     using UniModules.Editor;
 #endif
 
-    [CreateAssetMenu(menuName = "Game/GameDatabase/"+nameof(GameDataBaseAsset),fileName = nameof(GameDataBaseAsset))]
+    [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Asset",fileName = "Game DB Asset")]
     public class GameDataBaseAsset : ScriptableObject
     {
 

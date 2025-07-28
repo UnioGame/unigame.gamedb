@@ -1,8 +1,5 @@
 namespace Game.Code.DataBase.Runtime.Abstract
 {
-
-    using UniGame.Core.Runtime;
-    
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif

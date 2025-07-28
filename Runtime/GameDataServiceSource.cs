@@ -10,7 +10,7 @@ namespace UniGame.GameDB
     using UnityEngine;
     using UnityEngine.AddressableAssets;
 
-    [CreateAssetMenu(menuName = "Game/Services/Game Data/Game Data Source", fileName = "Game Data Service")]
+    [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Source", fileName = "Game DB Source")]
     public class GameDataServiceSource : DataSourceAsset<IGameDataService>
     {
         public AssetReferenceT<GameDataBaseAsset> _dataBaseAsset;
@@ -18,6 +18,7 @@ namespace UniGame.GameDB
         protected sealed override async UniTask<IGameDataService> CreateInternalAsync(IContext context)
         {
             var lifeTime = context.LifeTime;
+            
             var databaseAsset = await _dataBaseAsset
                 .LoadAssetTaskAsync(lifeTime)
                 .ToSharedInstanceAsync();

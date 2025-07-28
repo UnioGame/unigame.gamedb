@@ -9,7 +9,6 @@
     using UniGame.Core.Runtime;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
-    using Object = UnityEngine.Object;
 
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
@@ -21,8 +20,8 @@
     using UniGame.AddressableTools.Editor;
 #endif
     
-    [CreateAssetMenu(menuName = "Game/GameDatabase/Addressable Category",
-        fileName = "Addressable Category Asset")]
+    [CreateAssetMenu(menuName = "UniGame/Game DB/Addressable DB Category",
+        fileName = "Addressable DB Category")]
     public class AddressableGameDataCategory : GameDataCategory, IGameDataCategory
     {
 #if ODIN_INSPECTOR
