@@ -13,17 +13,14 @@ namespace UniGame.GameDB
     [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Source", fileName = "Game DB Source")]
     public class GameDataServiceSource : DataSourceAsset<IGameDataService>
     {
-        public AssetReferenceT<GameDataBaseAsset> _dataBaseAsset;
+        public GameDataBaseAsset dataBaseAsset;
 
         protected sealed override async UniTask<IGameDataService> CreateInternalAsync(IContext context)
         {
             var lifeTime = context.LifeTime;
-            
-            var databaseAsset = await _dataBaseAsset
-                .LoadAssetTaskAsync(lifeTime)
-                .ToSharedInstanceAsync();
+            var dbAsset = Instantiate(dataBaseAsset);
 
-            var database = await databaseAsset
+            var database = await dbAsset
                 .gameDatabase
                 .Initialize(lifeTime);
             

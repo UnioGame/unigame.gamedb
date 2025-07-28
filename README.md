@@ -45,6 +45,12 @@ public class GameDataServiceSource : DataSourceAsset<IGameDataService>
 
 ## GameDatabase
 
+To create all base game DB functionality call menu:
+
+```csharp
+"Assets/UniGame/Game DB/Create Game DB"
+```
+
 The main database class that manages resource categories and provides loading target asset by id
 
 ```csharp

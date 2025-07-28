@@ -1,10 +1,10 @@
 {
   "name": "com.unigame.gamedb",
   "author": "UniGame",
-  "displayName": "Game Runtime Database",
-  "description": "Configurable game resource database",
+  "displayName": "UniGame DB",
+  "description": "game db - configurable game resource database",
   "unity": "2022.1",
-  "version": "2025.0.5",
+  "version": "2025.0.6",
   "homepage": "https://github.com/UnioGame/UniGame.GameDB/blob/main/README.md",
   "repository": {
     "type": "git",

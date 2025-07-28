@@ -70,6 +70,9 @@
 #if ODIN_INSPECTOR
         [Button(ButtonSizes.Large,Icon = SdfIconType.ArchiveFill)]
 #endif
+#if ALCHEMY_INSPECTOR
+        [Button]
+#endif
         public virtual void UpdateCategory()
         {
             FillCategory();

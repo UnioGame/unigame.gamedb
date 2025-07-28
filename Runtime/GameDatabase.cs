@@ -25,7 +25,6 @@ namespace Game.Code.DataBase.Runtime
 #if ODIN_INSPECTOR
         [TabGroup(DatabaseKey)]
 #endif
-
         public DbData dbData = new();
         
 #if ODIN_INSPECTOR
