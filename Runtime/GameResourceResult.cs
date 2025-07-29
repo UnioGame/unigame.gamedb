@@ -18,4 +18,22 @@
         public string Error;
         public Exception Exception;
     }
+    
+    [Serializable]
+    public struct GameResourceResult<TAsset>
+    {
+        public const string ResourceError = "Game Resource Not Found";
+        public static GameResourceResult<TAsset> FailedResourceResult = new GameResourceResult<TAsset>()
+        {
+            Complete = false,
+            Error = ResourceError,
+            Result = default(TAsset)
+        };
+
+        public string Id;
+        public TAsset Result;
+        public bool Complete;
+        public string Error;
+        public Exception Exception;
+    }
 }

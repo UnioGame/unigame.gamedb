@@ -20,6 +20,11 @@
             return isUnityObject;
         }
 
+        public async UniTask<GameResourceResult> LoadAsync(string resource, ILifeTime lifeTime)
+        {
+            return await LoadAsync<Object>(resource, lifeTime);
+        }
+
         public async UniTask<GameResourceResult> LoadAsync<TResult>(string resource,ILifeTime lifeTime)
         {
             var addressableResult = await resource

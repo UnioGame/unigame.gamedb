@@ -88,6 +88,15 @@ To create a new category, implement the `GameDataCategory` asset class
 public abstract class GameDataCategory : ScriptableObject, IGameDataCategory
 ````
 
+## Unity Resource Category
+
+allows you to load resource from Unity's built-in resources system and group assets by category
+
+```csharp
+ublic abstract class ResourcesAssetsCategory<TAsset> : GameDataCategory
+        where TAsset : UnityEngine.Object
+```
+
 # Usage
 
 ```csharp

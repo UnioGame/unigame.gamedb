@@ -8,6 +8,8 @@
     {
         bool IsValidResourceSource(string resource,Type resourceType);
         
+        UniTask<GameResourceResult> LoadAsync(string resource, ILifeTime lifeTime);
+        
         UniTask<GameResourceResult> LoadAsync<TResult>(string resource, ILifeTime lifeTime);
     }
 }

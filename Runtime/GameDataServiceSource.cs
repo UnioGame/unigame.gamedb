@@ -11,11 +11,11 @@ namespace UniGame.GameDB
     using UnityEngine.AddressableAssets;
 
     [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Source", fileName = "Game DB Source")]
-    public class GameDataServiceSource : DataSourceAsset<IGameDataService>
+    public class GameDataServiceSource : DataSourceAsset<IGameDatabase>
     {
         public GameDataBaseAsset dataBaseAsset;
 
-        protected sealed override async UniTask<IGameDataService> CreateInternalAsync(IContext context)
+        protected sealed override async UniTask<IGameDatabase> CreateInternalAsync(IContext context)
         {
             var lifeTime = context.LifeTime;
             var dbAsset = Instantiate(dataBaseAsset);
@@ -26,9 +26,7 @@ namespace UniGame.GameDB
             
             context.Publish<IGameDatabase>(database);
 
-            var service = new GameDataService();
-
-            return service;
+            return database;
         }
     }
 }

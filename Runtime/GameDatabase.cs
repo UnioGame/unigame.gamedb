@@ -9,6 +9,7 @@ namespace Game.Code.DataBase.Runtime
     using UniGame.Runtime.Utils;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
+    using Object = UnityEngine.Object;
 
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
@@ -102,40 +103,37 @@ namespace Game.Code.DataBase.Runtime
         {
             return true;
         }
-        
-        public async UniTask<GameResourceResult> LoadAsync<TAsset>(string category,
-            string resourceId, ILifeTime lifeTime)
-        {
-            return default;
-        }
-        
-        public async UniTask<GameResourceResult> LoadAsync<TAsset>(string resourceId,ILifeTime lifeTime)
-        {
-            resourceId = resourceId.TrimEnd(' ');
-            
-            var record = Find(resourceId);
-            
-            var resource = record.resource;
-            var category = record.category;
-            var provider = category?.ResourceProvider;
-            
-            var loadFallBack = !record.success || 
-                               resource == EmptyRecord.Value || 
-                               provider == null;
-            
-            var assetResult = loadFallBack
-                ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
-                : await provider.LoadAsync<TAsset>(resource.Id,lifeTime);
-            
-            if(!assetResult.Complete) return assetResult;
 
-            return assetResult;
+        public async UniTask<GameResourceResult> LoadAsync(string resourceId, ILifeTime lifeTime)
+        {
+            return await LoadSourceAsync<Object>(resourceId, lifeTime);
+        }
+
+        public async UniTask<GameResourceResult<TAsset>> LoadAsync<TAsset>(string resourceId,ILifeTime lifeTime)
+        {
+            var assetResult = await LoadSourceAsync<TAsset>(resourceId, lifeTime);
+            
+            var resultAsset = default(TAsset);
+            
+            if (assetResult.Result is TAsset asset)
+                resultAsset = asset;
+            
+            var result = new GameResourceResult<TAsset>()
+            {
+                Id = resourceId,
+                Complete = assetResult.Complete,
+                Error = assetResult.Error,
+                Result = resultAsset,
+                Exception = assetResult.Exception,
+            };
+
+            return result;
         }
         
-        public async UniTask<GameResourceResult> LoadAsync<TAsset>(
+        public async UniTask<GameResourceResult<TAsset>> LoadAsync<TAsset>(
             string resourceId,
             GameDbResource record, 
-            ILifeTime lifeTime)
+            ILifeTime lifeTime) where TAsset : class
         {
             var resource = record.resource;
             var category = record.category;
@@ -146,17 +144,40 @@ namespace Game.Code.DataBase.Runtime
             var assetResult = loadFallBack
                 ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
                 : await provider.LoadAsync<TAsset>(resource.Id,lifeTime);
-            
-            if(!assetResult.Complete) return assetResult;
 
-            return assetResult;
+#if UNITY_EDITOR
+
+            if (assetResult.Complete == false)
+            {
+                Debug.LogError($"Load resource failed: {resourceId} " +
+                               $"from category: {category.Category} " +
+                               $"with error: {assetResult.Error}");
+            }
+            
+#endif
+            
+            var resultAsset = default(TAsset);
+            if (assetResult.Result is TAsset asset)
+                resultAsset = asset;
+            
+            var result = new GameResourceResult<TAsset>()
+            {
+                Id = resourceId,
+                Complete = assetResult.Complete,
+                Error = assetResult.Error,
+                Result = resultAsset,
+                Exception = assetResult.Exception,
+            };
+
+            return result;
         }
 
         public async UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, 
             ILifeTime lifeTime)
         {
             var resources = FindAll(resource);
-            var tasks = resources.Select(x => LoadAsync<TResult>(resource,x,lifeTime));
+            var tasks = resources
+                .Select(x => LoadSourceAsync<TResult>(resource,lifeTime));
             var results = await UniTask.WhenAll(tasks);
             return results;
         }
@@ -233,6 +254,40 @@ namespace Game.Code.DataBase.Runtime
             return result;
         }
 
+                
+        public async UniTask<GameResourceResult> LoadSourceAsync<TAsset>(string resourceId,ILifeTime lifeTime)
+        {
+            resourceId = resourceId.TrimEnd(' ');
+            
+            var record = Find(resourceId);
+            
+            var resource = record.resource;
+            var category = record.category;
+            var provider = category?.ResourceProvider;
+            
+            var loadFallBack = !record.success || 
+                               resource == EmptyRecord.Value || 
+                               provider == null;
+            
+            var assetResult = loadFallBack
+                ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
+                : await provider.LoadAsync<TAsset>(resource.Id,lifeTime);
+            
+#if UNITY_EDITOR
+
+            if (assetResult.Complete == false)
+            {
+                Debug.LogError($"Load resource failed: {resourceId} " +
+                               $"from category: {category.Category} " +
+                               $"with error: {assetResult.Error}");
+            }
+            
+#endif
+           
+            return assetResult;
+        }
+        
+        
         private async UniTask<GameResourceResult> LoadFallbackResourceAsync<TAsset>(
             string resourceId,
             ILifeTime lifeTime)
