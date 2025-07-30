@@ -10,9 +10,11 @@
     using UniModules.Editor;
     using UnityEditor;
 
-    public abstract class ResourcesAssetsCategory<TAsset> : GameDataCategory
+    public abstract class ResourcesAssetsCategoryT<TAsset> : GameDataCategory
         where TAsset : UnityEngine.Object
     {
+        public const string ResourcesPath = "Resources/";
+        
         public List<ResourceDataRecord> records = new();
 
         private Dictionary<string, IGameResourceRecord> _map;
@@ -65,13 +67,16 @@
         {
             records.Clear();
             var itemData = AssetEditorTools.GetAssets<TAsset>();
-            var recordLength = "Resources/".Length;
+            var recordLength = ResourcesPath.Length;
 
             foreach (var item in itemData)
             {
                 if (item == null) continue;
                 var itemPath = AssetDatabase.GetAssetPath(item);
-                var index = itemPath.IndexOf("Resources/", StringComparison.OrdinalIgnoreCase);
+                
+                if(itemPath.Contains(ResourcesPath) == false) continue;
+                    
+                var index = itemPath.IndexOf(ResourcesPath, StringComparison.OrdinalIgnoreCase);
                 if (index < 0) continue;
 
                 var indexStart = index + recordLength;
