@@ -21,24 +21,7 @@
         public const string SettingsGroupKey = "settings";
         public const string CategoryGroupKey = "category";
 
-        #region inspector
-
-#if ODIN_INSPECTOR
-        [TabGroup(CategoryGroupKey)]
-#endif
         public string category;
-
-#if ODIN_INSPECTOR
-        [TabGroup(SettingsGroupKey)]
-#endif
-        public bool useAssetResourceProvider = false;
-        
-#if ODIN_INSPECTOR
-        [TabGroup(SettingsGroupKey)] [InlineEditor()] [ShowIf(nameof(useAssetResourceProvider))]
-#endif
-        public GameResourceLocation resourceLocation;
-
-        #endregion
 
         public virtual string Category => category;
 

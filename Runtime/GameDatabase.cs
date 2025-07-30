@@ -235,8 +235,10 @@ namespace Game.Code.DataBase.Runtime
             foreach (var category in _categories)
             {
                 var record = category.Find(filter);
-                if(record == EmptyRecord.Value || string.IsNullOrEmpty(record.Id))
-                    continue;
+                
+                if(record == null || 
+                   record == EmptyRecord.Value || 
+                   string.IsNullOrEmpty(record.Id)) continue;
                 
                 result = new GameDbResource()
                 {
