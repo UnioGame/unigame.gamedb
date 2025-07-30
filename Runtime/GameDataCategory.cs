@@ -32,14 +32,7 @@
         [TabGroup(SettingsGroupKey)]
 #endif
         public bool useAssetResourceProvider = false;
-
-#if ODIN_INSPECTOR
-        [TabGroup(SettingsGroupKey)]
-        [HideIf(nameof(useAssetResourceProvider))]
-#endif
-        [SerializeReference]
-        public IGameResourceProvider resourceProvider = new AddressableResourceProvider();
-
+        
 #if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)] [InlineEditor()] [ShowIf(nameof(useAssetResourceProvider))]
 #endif
@@ -49,7 +42,7 @@
 
         public virtual string Category => category;
 
-        public virtual IGameResourceProvider ResourceProvider => resourceProvider;
+        public abstract IGameResourceProvider ResourceProvider { get; }
 
         public abstract Dictionary<string, IGameResourceRecord> Map { get; }
 

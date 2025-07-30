@@ -16,6 +16,9 @@
         public List<ResourceDataRecord> records = new();
 
         private Dictionary<string, IGameResourceRecord> _map;
+        private IGameResourceProvider _resourceProvider = new UnityResourcesDataProvider();
+
+        public override IGameResourceProvider ResourceProvider => _resourceProvider;
 
         public override IReadOnlyList<IGameResourceRecord> Records => records;
 

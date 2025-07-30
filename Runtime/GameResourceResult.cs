@@ -12,7 +12,8 @@
             Error = ResourceError,
             Result = null
         };
-        
+
+        public string Id;
         public object Result;
         public bool Complete;
         public string Error;

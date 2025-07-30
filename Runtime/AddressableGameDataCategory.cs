@@ -28,14 +28,14 @@
         [TabGroup(CategoryGroupKey)]
         [Searchable(FilterOptions = SearchFilterOptions.ISearchFilterableInterface)]
 #endif
-
         public List<AddressablesObjectRecord> records = new List<AddressablesObjectRecord>();
-
+        
 #if ODIN_INSPECTOR
         [TabGroup(SettingsGroupKey)]
 #endif
         public AddressableFilterData filterData = new AddressableFilterData();
         
+        private IGameResourceProvider _resourceProvider = new AddressableResourceProvider();
         private Dictionary<string, IGameResourceRecord> _map = new(128);
         private Dictionary<string, List<IGameResourceRecord>> _recordsMap = new(128);
         private Dictionary<string, IGameResourceRecord> _recordMap = new(128);
@@ -43,6 +43,8 @@
         private IGameResourceRecord[] _records;
         private List<IGameResourceRecord> _collectionBuffer = new();
 
+        public override IGameResourceProvider ResourceProvider => _resourceProvider;
+        
         public override Dictionary<string, IGameResourceRecord> Map => _map;
         
         public override IReadOnlyList<IGameResourceRecord> Records => _records;
