@@ -10,9 +10,11 @@ namespace Game.Code.DataBase.Runtime
         public string name;
         public AssetReference assetReference;
         public string[] labels = Array.Empty<string>();
-        
+        private string _resourcePath;
 
         public string Id => assetReference.AssetGUID;
+
+        public string ResourcePath => assetReference.AssetGUID;
 
         public string Name
         {

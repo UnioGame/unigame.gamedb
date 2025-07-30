@@ -12,6 +12,8 @@
         public string Name => id;
 
         public string Id => id;
+        
+        public string ResourcePath => resourcePath;
 
         public bool CheckRecord(string filter)
         {

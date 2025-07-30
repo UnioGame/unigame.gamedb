@@ -8,10 +8,13 @@ namespace Game.Code.DataBase.Runtime
     public class UnityObjectResourceRecord : IGameResourceRecord
     {
         public Object asset;
+        private string _resourcePath;
 
-        public string Name => asset.name;
+        public string Name => Id;
 
         public string Id => asset == null ? DatabaseRecordConstants.EmptyId : asset.name;
+
+        public string ResourcePath => _resourcePath;
 
         public bool CheckRecord(string filter)
         {

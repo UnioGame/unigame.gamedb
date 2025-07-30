@@ -263,6 +263,7 @@ namespace Game.Code.DataBase.Runtime
             
             var resource = record.resource;
             var category = record.category;
+            var resourcePath = resource.ResourcePath;
             var provider = category?.ResourceProvider;
             
             var loadFallBack = !record.success || 
@@ -271,7 +272,7 @@ namespace Game.Code.DataBase.Runtime
             
             var assetResult = loadFallBack
                 ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
-                : await provider.LoadAsync<TAsset>(resource.Id,lifeTime);
+                : await provider.LoadAsync<TAsset>(resourcePath,lifeTime);
             
 #if UNITY_EDITOR
 

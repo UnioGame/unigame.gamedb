@@ -10,7 +10,9 @@ namespace Game.Code.DataBase.Runtime.Abstract
 #endif
     {
         public string Name { get; }
+        
         public string Id { get; }
+        public string ResourcePath { get; }
         
         bool CheckRecord(string filter);
         

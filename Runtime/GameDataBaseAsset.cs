@@ -17,7 +17,8 @@ namespace Game.Code.DataBase.Runtime
     [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Asset",fileName = "Game DB Asset")]
     public class GameDataBaseAsset : ScriptableObject
     {
-
+        public bool enableAutoUpdate = true;
+        
 #if ODIN_INSPECTOR
         [InlineProperty]
         [HideLabel]
