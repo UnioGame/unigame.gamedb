@@ -10,10 +10,19 @@
     using UniModules.Editor;
     using UnityEditor;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+
     public abstract class ResourcesAssetsCategoryT<TAsset> : GameDataCategory
         where TAsset : UnityEngine.Object
     {
         public const string ResourcesPath = "Resources/";
+
+#if ODIN_INSPECTOR
+        [FolderPath]
+#endif
+        public string[] folders = new []{ "Assets/Resources" };
         
         public List<ResourceDataRecord> records = new();
 
@@ -66,7 +75,7 @@
         public override IReadOnlyList<IGameResourceRecord> FillCategory()
         {
             records.Clear();
-            var itemData = AssetEditorTools.GetAssets<TAsset>();
+            var itemData = AssetEditorTools.GetAssets<TAsset>(folders);
             var recordLength = ResourcesPath.Length;
 
             foreach (var item in itemData)

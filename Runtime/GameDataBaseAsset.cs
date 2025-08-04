@@ -8,6 +8,10 @@ namespace Game.Code.DataBase.Runtime
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
+#if ALCHEMY_INSPECTOR
+    using Alchemy.Inspector;
+#endif
+    
     
 #if UNITY_EDITOR
     using UnityEditor;
@@ -89,6 +93,9 @@ namespace Game.Code.DataBase.Runtime
 #if ODIN_INSPECTOR
         [Button(Icon = SdfIconType.ArchiveFill)]
         [PropertyOrder(-1)]
+#endif
+#if ALCHEMY_INSPECTOR
+        [Button]
 #endif
         public void UpdateData()
         {

@@ -1,6 +1,7 @@
 ﻿namespace UniGame.GameDB
 {
     using System;
+    using System.Collections;
     using Game.Code.DataBase.Runtime;
     using UniModules.Editor;
     using UnityEditor;
