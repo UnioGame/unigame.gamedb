@@ -1,5 +1,6 @@
 ﻿namespace UniGame.GameDB
 {
+    using System;
     using Game.Code.DataBase.Runtime;
     using UniModules.Editor;
     using UnityEditor;
@@ -20,8 +21,16 @@
             
             _dataBaseAsset ??= AssetEditorTools.GetAsset<GameDataBaseAsset>();
             if(_dataBaseAsset.enableAutoUpdate == false) return;
-            
-            _dataBaseAsset.UpdateData();
+
+            try
+            {
+                AssetDatabase.StartAssetEditing();
+                _dataBaseAsset.UpdateData();
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
+            }
         }
 
     }
