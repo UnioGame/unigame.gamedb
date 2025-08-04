@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using Code.DataBase.Runtime;
     using Code.DataBase.Runtime.Abstract;
     using Cysharp.Threading.Tasks;
@@ -26,9 +27,11 @@
         
         public List<ResourceDataRecord> records = new();
 
+        private List<string> _paths = new();
         private Dictionary<string, IGameResourceRecord> _map;
         private IGameResourceProvider _resourceProvider = new UnityResourcesDataProvider();
 
+        
         public override IGameResourceProvider ResourceProvider => _resourceProvider;
 
         public override IReadOnlyList<IGameResourceRecord> Records => records;
@@ -75,13 +78,17 @@
         public override IReadOnlyList<IGameResourceRecord> FillCategory()
         {
             records.Clear();
-            var itemData = AssetEditorTools.GetAssets<TAsset>(folders);
+            
+            _paths.Clear();
+            
+            AssetEditorTools.GetAssetsPaths<TAsset>(folders,_paths);
+            
             var recordLength = ResourcesPath.Length;
 
-            foreach (var item in itemData)
+            foreach (var item in _paths)
             {
                 if (item == null) continue;
-                var itemPath = AssetDatabase.GetAssetPath(item);
+                var itemPath = item;
                 
                 if(itemPath.Contains(ResourcesPath) == false) continue;
                     
@@ -93,12 +100,14 @@
 
                 if (string.IsNullOrEmpty(resourcePath)) continue;
 
-                resourcePath = resourcePath.GetDirectoryPath();
-                resourcePath = resourcePath.CombinePath(item.name);
+                var fileName = Path.GetFileNameWithoutExtension(resourcePath);
+                var directoryPath = resourcePath.GetDirectoryPath();
+                
+                resourcePath = directoryPath.CombinePath(fileName);
 
                 var record = new ResourceDataRecord
                 {
-                    id = item.name,
+                    id = fileName,
                     resourcePath = resourcePath
                 };
 
