@@ -1,4 +1,4 @@
-namespace Game.Code.DataBase.Runtime.Abstract
+namespace UniGame.GameDb.Runtime
 {
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;

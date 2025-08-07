@@ -2,7 +2,7 @@ namespace Game.Code.DataBase.Runtime
 {
     using System;
     using System.Collections.Generic;
-    using Abstract;
+    using UniGame.GameDb.Runtime;
     using Cysharp.Threading.Tasks;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;

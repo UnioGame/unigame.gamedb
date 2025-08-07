@@ -1,4 +1,4 @@
-namespace Game.Code.DataBase.Runtime.Abstract
+namespace UniGame.GameDb.Runtime
 {
     using System;
 

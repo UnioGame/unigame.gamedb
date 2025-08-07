@@ -1,7 +1,7 @@
-﻿namespace Game.Modules.game.packages.unigame.gamedb.Runtime
+﻿namespace UniGame.GameDb.Runtime
 {
     using System;
-    using Code.DataBase.Runtime.Abstract;
+    using Runtime;
 
     [Serializable]
     public class ResourceDataRecord : IGameResourceRecord

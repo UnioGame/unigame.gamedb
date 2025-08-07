@@ -1,7 +1,8 @@
-﻿namespace Game.Code.DataBase.Runtime.Abstract
+﻿namespace UniGame.GameDb.Runtime
 {
     using System;
     using Cysharp.Threading.Tasks;
+    using Game.Code.DataBase.Runtime;
     using UniGame.Core.Runtime;
 
     public interface IGameResourceProvider

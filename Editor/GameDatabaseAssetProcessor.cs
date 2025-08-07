@@ -21,6 +21,7 @@
             if (!haveChanges) return;
             
             _dataBaseAsset ??= AssetEditorTools.GetAsset<GameDataBaseAsset>();
+            if(_dataBaseAsset == null) return;
             if(_dataBaseAsset.enableAutoUpdate == false) return;
 
             try

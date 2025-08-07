@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
-    using Abstract;
+    using UniGame.GameDb.Runtime;
     using Cysharp.Threading.Tasks;
     using UniGame.Core.Runtime;
     using UnityEngine;

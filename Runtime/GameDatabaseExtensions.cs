@@ -1,7 +1,7 @@
-﻿namespace Game.Modules.game.packages.unigame.gamedb.Runtime
+﻿namespace UniGame.GameDb.Runtime
 {
-    using Code.DataBase.Runtime.Abstract;
     using Cysharp.Threading.Tasks;
+    using Runtime;
     using UniGame.Core.Runtime;
 
     public static class GameDatabaseExtensions

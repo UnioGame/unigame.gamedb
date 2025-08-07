@@ -4,7 +4,7 @@
   "displayName": "UniGame DB",
   "description": "game db - configurable game resource database",
   "unity": "2022.1",
-  "version": "2025.0.16",
+  "version": "2025.0.17",
   "homepage": "https://github.com/UnioGame/UniGame.GameDB/blob/main/README.md",
   "repository": {
     "type": "git",

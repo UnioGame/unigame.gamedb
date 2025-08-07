@@ -1,6 +1,6 @@
 namespace Game.Code.DataBase.Runtime
 {
-    using Abstract;
+    using UniGame.GameDb.Runtime;
 
     public class EmptyRecord : IGameResourceRecord
     {

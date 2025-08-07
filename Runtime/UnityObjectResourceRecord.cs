@@ -1,7 +1,7 @@
 namespace Game.Code.DataBase.Runtime
 {
     using System;
-    using Abstract;
+    using UniGame.GameDb.Runtime;
     using Object = UnityEngine.Object;
 
     [Serializable]

@@ -4,7 +4,7 @@ namespace UniGame.GameDB
     using Core.Runtime.Extension;
     using Cysharp.Threading.Tasks;
     using Game.Code.DataBase.Runtime;
-    using Game.Code.DataBase.Runtime.Abstract;
+    using GameDb.Runtime;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Context.Runtime;
     using UnityEngine;
