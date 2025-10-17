@@ -8,6 +8,7 @@
     using Runtime;
     using UniGame.Core.Runtime;
     using UniModules;
+    using UnityEngine;
 
 #if UNITY_EDITOR
     using UniModules.Editor;
@@ -19,6 +20,7 @@
     using Sirenix.OdinInspector;
 #endif
 
+    [Serializable]
     public abstract class ResourcesAssetsCategoryT<TAsset> : GameDataCategory
         where TAsset : UnityEngine.Object
     {
@@ -29,14 +31,15 @@
 #endif
         public string[] folders = new []{ "Assets/Resources" };
         
+        [SerializeReference]
+        public IGameResourceProvider resourceProvider = new UnityResourcesDataProvider();
+        
         public List<ResourceDataRecord> records = new();
 
         private List<string> _paths = new();
         private Dictionary<string, IGameResourceRecord> _map;
-        private IGameResourceProvider _resourceProvider = new UnityResourcesDataProvider();
-
         
-        public override IGameResourceProvider ResourceProvider => _resourceProvider;
+        public override IGameResourceProvider ResourceProvider => resourceProvider;
 
         public override IReadOnlyList<IGameResourceRecord> Records => records;
 

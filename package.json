@@ -1,10 +1,10 @@
 {
   "name": "com.unigame.gamedb",
   "author": "UniGame",
-  "displayName": "UniGame DB",
+  "displayName": "UniGame Data Base",
   "description": "game db - configurable game resource database",
-  "unity": "2022.1",
-  "version": "2025.0.17",
+  "unity": "2023.1",
+  "version": "2025.0.18",
   "homepage": "https://github.com/UnioGame/UniGame.GameDB/blob/main/README.md",
   "repository": {
     "type": "git",
@@ -18,7 +18,6 @@
   "dependencies": {
     "com.unity.addressables": "2.6.0",
     "com.unigame.unicore": "https://github.com/UnioGame/unigame.core.git",
-    "com.unigame.localization": "https://github.com/UnioGame/unigame.localization.git",
     "com.unigame.rx": "https://github.com/UnioGame/unigame.rx.git",
     "com.cysharp.unitask" : "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
