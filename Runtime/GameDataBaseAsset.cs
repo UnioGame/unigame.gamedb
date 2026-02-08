@@ -22,6 +22,10 @@ namespace Game.Code.DataBase.Runtime
     public class GameDataBaseAsset : ScriptableObject
     {
         public bool enableAutoUpdate = true;
+
+        public long lastImportTime;//in milliseconds since epoch
+        
+        public int importDelay = 1000;//in milliseconds
         
 #if ODIN_INSPECTOR
         [InlineProperty]
