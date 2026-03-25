@@ -53,11 +53,6 @@ namespace Game.Code.DataBase.Runtime
             
             var ids = config.gameDatabase
                 .categories
-                .Where(x => x.editorAsset!=null)
-                .Where(x => 
-                    x.editorAsset.category == GameResourceCategoryId.Empty || 
-                    x.editorAsset.category == category)
-                .Select(x => x.editorAsset)
                 .SelectMany(x => x.Records)
                 .Select(x => new ValueDropdownItem<GameResourceRecordId>() {
                     Text = x.Name,
@@ -85,8 +80,6 @@ namespace Game.Code.DataBase.Runtime
             var config = AssetDatabase.LoadAssetAtPath<GameDataBaseAsset>(AssetDatabase.GUIDToAssetPath(guid));
             var records = config.gameDatabase
                 .categories
-                .Where(x => x.editorAsset!=null)
-                .Select(x => x.editorAsset)
                 .Select(x => (GameResourceCategoryId)x.Category)
                 .ToList();
 
@@ -105,10 +98,9 @@ namespace Game.Code.DataBase.Runtime
         {
             foreach (var category in gameDatabase.categories)
             {
-                var categoryAsset = category.editorAsset;
-                if(categoryAsset == null) continue;
-                categoryAsset.FillCategory();
-                categoryAsset.MarkDirty();
+                if(category == null) continue;
+                category.FillCategory();
+                category.MarkDirty();
             }
         }
         

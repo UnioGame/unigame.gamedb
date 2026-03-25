@@ -22,7 +22,10 @@ namespace UniGame.GameDB
 
             var database = await dbAsset
                 .gameDatabase
-                .Initialize(lifeTime);
+                .Initialize();
+
+            dbAsset.DestroyWith(lifeTime);
+            database.AddTo(lifeTime);
             
             context.Publish<IGameDatabase>(database);
 

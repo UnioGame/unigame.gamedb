@@ -5,7 +5,7 @@ namespace UniGame.GameDb.Runtime
     using Game.Code.DataBase.Runtime;
     using UniGame.Core.Runtime;
 
-    public interface IGameDatabase
+    public interface IGameDatabase : IDisposable
     {
         UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, ILifeTime lifeTime);
         

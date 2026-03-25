@@ -6,6 +6,7 @@ namespace Game.Code.DataBase.Runtime
     using Cysharp.Threading.Tasks;
     using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
+    using UniGame.Runtime.DataFlow;
     using UniGame.Runtime.Utils;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
@@ -46,7 +47,7 @@ namespace Game.Code.DataBase.Runtime
         [TabGroup(DatabaseKey)]
         [InlineProperty]
 #endif
-        public List<AssetReferenceT<GameDataCategory>> categories = new();
+        public List<GameDataCategory> categories = new();
 
         #endregion
 
@@ -58,39 +59,33 @@ namespace Game.Code.DataBase.Runtime
         private Dictionary<string,GameDbResource> _dbResourceCache = new(256);
         private Dictionary<string,GameDbResource[]> _dbResourcesCache = new(256);
         private List<GameDbResource> _dbCacheResources = new();
+        private LifeTime _lifeTime = new();
 
-        public async UniTask<IGameDatabase> Initialize(ILifeTime lifeTime)
+        public async UniTask<IGameDatabase> Initialize()
         {
+            _lifeTime.Restart();
             _dbResourceCache.Clear();
             _dbResourcesCache.Clear();
             _fallBackLocations.Clear();
             _fallBackLocations.AddRange(fallBack);
             _fallBackLocations.AddRange(fallBackLocations);
             
-            var tasks = categories.Select(x =>
-                x.LoadAssetInstanceTaskAsync(lifeTime, true));
+            var tasks = categories.Select(AddCategory);
             
-            var categoriesAssets = await UniTask.WhenAll(tasks);
-
-            var initializedCategories = categoriesAssets
-                .Select(x => x.InitializeAsync(lifeTime));
-            
-            var initializeResults = await UniTask.WhenAll(initializedCategories);
-
-            foreach (var categoryResult in initializeResults)
-            {
-                if (!categoryResult.complete)
-                {
-                    Debug.LogError($"[GameDB] filed to initialize category {categoryResult.categoryName} error: {categoryResult.error}");
-                    continue;    
-                }
-                
-                var category = categoryResult.category;
-                _categories.Add(category);
-                _categoriesMap[category.Category] = categoryResult.category;
-            }
+            await UniTask.WhenAll(tasks);
             
             return this;
+        }
+
+        public async UniTask AddCategory(GameDataCategory category)
+        {
+            var instance = Object.Instantiate(category);
+            await instance.InitializeAsync(_lifeTime);
+
+            instance.DestroyWith(_lifeTime);
+            
+            _categories.Add(instance);
+            _categoriesMap[instance.Category] = instance;
         }
 
         public IGameDataCategory GetCategory(string category)
@@ -317,6 +312,10 @@ namespace Game.Code.DataBase.Runtime
             public IGameResourceRecord resource;
         }
 
+        public void Dispose()
+        {
+            _lifeTime.Terminate();
+        }
     }
 
     [Serializable]

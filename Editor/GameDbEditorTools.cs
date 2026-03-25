@@ -31,9 +31,8 @@
             
             dbAddressableCategory = dbAddressableCategory.SaveAsset(contextPath);
             dbAddressableCategory.AddToDefaultAddressableGroup();
-            var categoryGuid = dbAddressableCategory.GetGUID();
             
-            dbAsset.gameDatabase.categories.Add(new AssetReferenceT<GameDataCategory>(categoryGuid));
+            dbAsset.gameDatabase.categories.Add(dbAddressableCategory);
 
             dbSourceAsset.MarkDirty();
             dbAddressableCategory.MarkDirty();
