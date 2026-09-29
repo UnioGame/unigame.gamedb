@@ -32,6 +32,8 @@ namespace Game.Code.DataBase.Runtime
 
         public override IReadOnlyList<IGameResourceRecord> Records => records;
 
+        public override bool IsEntryDriven => true;
+
 #if UNITY_EDITOR
 
         /// <summary>records for the addressable assets under <see cref="folders"/>; no asset object is loaded</summary>

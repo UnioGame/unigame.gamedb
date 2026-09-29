@@ -43,6 +43,8 @@ namespace Game.Code.DataBase.Runtime
 
         public override IReadOnlyList<IGameResourceRecord> Records => records;
 
+        public override bool IsEntryDriven => true;
+
         public override UniTask<CategoryInitializeResult> InitializeAsync(ILifeTime lifeTime)
         {
             _labelMap = null;

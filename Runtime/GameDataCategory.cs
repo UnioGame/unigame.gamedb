@@ -40,6 +40,12 @@ namespace Game.Code.DataBase.Runtime
 
         public virtual string Category => category;
 
+        /// <summary>
+        /// true when the records mirror addressable entries (guid, path, labels): the editor refreshes such a category from
+        /// entry events. Other categories are filled by their builders or by the manual Update button only.
+        /// </summary>
+        public virtual bool IsEntryDriven => false;
+
         public virtual IGameResourceProvider ResourceProvider =>
             resourceLocation != null ? resourceLocation : DefaultProvider;
 
