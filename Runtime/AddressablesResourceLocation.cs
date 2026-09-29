@@ -1,48 +1,30 @@
-﻿namespace Game.Code.DataBase.Runtime
+namespace Game.Code.DataBase.Runtime
 {
     using System;
-    using UniGame.GameDb.Runtime;
     using Cysharp.Threading.Tasks;
-    using UniGame.AddressableTools.Runtime;
     using UniGame.Core.Runtime;
+    using UnityEngine;
     using Object = UnityEngine.Object;
 
-    [Serializable]
-    public class AddressableResourceProvider : IGameResourceProvider
+    /// <summary>asset form of <see cref="AddressableResourceProvider"/> (existing categories reference it as a serialized asset)</summary>
+    [CreateAssetMenu(menuName = "UniGame/Game DB/Locations/" + nameof(AddressablesResourceLocation), fileName = nameof(AddressablesResourceLocation))]
+    public class AddressablesResourceLocation : GameResourceLocation
     {
-        public const string LoadingError = "Asset {0} not found";
-        
-        public Type unityObjectType = typeof(Object);
-        
-        public bool IsValidResourceSource(string resource, Type resourceType)
-        {
-            var isUnityObject = unityObjectType.IsAssignableFrom(resourceType);
-            return isUnityObject;
-        }
+        private readonly AddressableResourceProvider _provider = new AddressableResourceProvider();
 
-        public async UniTask<GameResourceResult> LoadAsync(string resource, ILifeTime lifeTime)
-        {
-            return await LoadAsync<Object>(resource, lifeTime);
-        }
+        public override bool IsValidResourceSource(string resource, Type resourceType) =>
+            _provider.IsValidResourceSource(resource, resourceType);
 
-        public async UniTask<GameResourceResult> LoadAsync<TResult>(string resource,ILifeTime lifeTime)
-        {
-            var addressableResult = await resource
-                .LoadAssetTaskAsync<TResult>(lifeTime);
+        public override UniTask<GameResourceResult> LoadAsync(string resource, ILifeTime lifeTime) =>
+            _provider.LoadAsync<Object>(resource, lifeTime);
 
-            var error = addressableResult == null ? string.Format(LoadingError, resource) : string.Empty;
-            
-            var result = new GameResourceResult()
-            {
-                Complete = addressableResult!=null,
-                Error = error,
-                Exception = null,
-                Result = addressableResult
-            };
-            
-            return result;
+        public override UniTask<GameResourceResult> LoadAsync<TAsset>(string resource, ILifeTime lifeTime) =>
+            _provider.LoadAsync<TAsset>(resource, lifeTime);
+
+        public override async UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, ILifeTime lifeTime)
+        {
+            var single = await _provider.LoadAsync<TResult>(resource, lifeTime);
+            return new[] { single };
         }
-        
     }
-
 }

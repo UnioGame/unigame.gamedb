@@ -1,4 +1,4 @@
-﻿namespace UniGame.GameDB
+namespace UniGame.GameDB
 {
     using AddressableTools.Editor;
     using Game.Code.DataBase.Runtime;
@@ -26,13 +26,14 @@
             Debug.Log("Game DB: path: " + contextPath);
 
             dbAsset = dbAsset.SaveAsset(contextPath);
-            dbSourceAsset.dataBaseAsset = dbAsset;
+            dbAsset.AddToDefaultAddressableGroup();
+            dbSourceAsset._dataBaseAsset = new AssetReferenceT<GameDataBaseAsset>(dbAsset.GetGUID());
             dbSourceAsset = dbSourceAsset.SaveAsset(contextPath);
             
             dbAddressableCategory = dbAddressableCategory.SaveAsset(contextPath);
             dbAddressableCategory.AddToDefaultAddressableGroup();
             
-            dbAsset.gameDatabase.categories.Add(dbAddressableCategory);
+            dbAsset.gameDatabase.categories.Add(new AssetReferenceT<GameDataCategory>(dbAddressableCategory.GetGUID()));
 
             dbSourceAsset.MarkDirty();
             dbAddressableCategory.MarkDirty();

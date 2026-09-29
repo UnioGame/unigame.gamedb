@@ -15,20 +15,26 @@ namespace Game.Code.DataBase.Runtime
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
 #endif
-    
+
+    /// <summary>
+    /// The project registry of game data categories.
+    /// Categories are AssetReferences (loaded through the lifetime aware addressable extensions, shared, never
+    /// instantiated), the record index is an exact-id dictionary (O(1)), the legacy name/label filter is a per-category
+    /// dictionary lookup that runs only when the exact id misses.
+    /// </summary>
     [Serializable]
     public class GameDatabase : IGameDatabase
     {
         public const string SettingsKey = "Settings";
         public const string DatabaseKey = "Database";
-        
+
         #region inspector
 
 #if ODIN_INSPECTOR
         [TabGroup(DatabaseKey)]
 #endif
         public DbData dbData = new();
-        
+
 #if ODIN_INSPECTOR
         [TabGroup(SettingsKey)]
 #endif
@@ -36,7 +42,7 @@ namespace Game.Code.DataBase.Runtime
         public List<IGameResourceProvider> fallBack = new() {
             new AddressableResourceProvider(),
         };
-        
+
 #if ODIN_INSPECTOR
         [TabGroup(SettingsKey)]
         [InlineEditor()]
@@ -47,55 +53,108 @@ namespace Game.Code.DataBase.Runtime
         [TabGroup(DatabaseKey)]
         [InlineProperty]
 #endif
-        public List<GameDataCategory> categories = new();
+        public List<AssetReferenceT<GameDataCategory>> categories = new();
 
         #endregion
 
-        private List<IGameDataCategory> _categories = new();
-        private List<IGameResourceProvider> _fallBackLocations = new();
-        private Dictionary<string, IGameResourceRecord> _records = new(256);
-        private Dictionary<string,IGameDataCategory> _categoriesMap = new(16);
-        
-        private Dictionary<string,GameDbResource> _dbResourceCache = new(256);
-        private Dictionary<string,GameDbResource[]> _dbResourcesCache = new(256);
-        private List<GameDbResource> _dbCacheResources = new();
+        private readonly List<IGameDataCategory> _categories = new();
+        private readonly List<IGameResourceProvider> _fallBackLocations = new();
+        private readonly Dictionary<string, GameDbResource> _index = new(512, StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, IGameDataCategory> _categoriesMap = new(16, StringComparer.OrdinalIgnoreCase);
         private LifeTime _lifeTime = new();
 
-        public async UniTask<IGameDatabase> Initialize()
+        public IReadOnlyList<IGameDataCategory> Categories => _categories;
+
+        public int IndexedRecords => _index.Count;
+
+        /// <summary>initialize with the database own lifetime (released by <see cref="Dispose"/>)</summary>
+        public UniTask<IGameDatabase> Initialize()
         {
             _lifeTime.Restart();
-            _dbResourceCache.Clear();
-            _dbResourcesCache.Clear();
+            return Initialize(_lifeTime);
+        }
+
+        public async UniTask<IGameDatabase> Initialize(ILifeTime lifeTime)
+        {
+            _categories.Clear();
+            _categoriesMap.Clear();
+            _index.Clear();
             _fallBackLocations.Clear();
             _fallBackLocations.AddRange(fallBack);
             _fallBackLocations.AddRange(fallBackLocations);
-            
-            var tasks = categories.Select(AddCategory);
-            
-            await UniTask.WhenAll(tasks);
-            
+
+            //load in parallel, register in the serialized order (first category wins on duplicate ids)
+            var tasks = new UniTask<GameDataCategory>[categories.Count];
+            for (var i = 0; i < categories.Count; i++)
+                tasks[i] = LoadCategoryAsync(categories[i], lifeTime);
+
+            var loaded = await UniTask.WhenAll(tasks);
+
+            foreach (var asset in loaded)
+            {
+                if (asset == null) continue;
+                await AddCategory(asset, lifeTime);
+            }
+
             return this;
         }
 
-        public async UniTask AddCategory(GameDataCategory category)
+        public async UniTask AddCategory(GameDataCategory category, ILifeTime lifeTime)
         {
-            var instance = Object.Instantiate(category);
-            await instance.InitializeAsync(_lifeTime);
+            //categories are shared assets: their maps are runtime-only state, no Object.Instantiate copy of the records
+            await category.InitializeAsync(lifeTime);
 
-            instance.DestroyWith(_lifeTime);
-            
-            _categories.Add(instance);
-            _categoriesMap[instance.Category] = instance;
+            _categories.Add(category);
+            _categoriesMap[category.Category] = category;
+
+            foreach (var pair in category.Map)
+            {
+                var record = pair.Value;
+                if (record == null || string.IsNullOrEmpty(pair.Key)) continue;
+                if (_index.ContainsKey(pair.Key)) continue;
+                _index[pair.Key] = new GameDbResource()
+                {
+                    filter = pair.Key,
+                    success = true,
+                    category = category,
+                    resource = record,
+                };
+            }
+        }
+
+        private static async UniTask<GameDataCategory> LoadCategoryAsync(AssetReferenceT<GameDataCategory> reference, ILifeTime lifeTime)
+        {
+            if (reference == null || !reference.RuntimeKeyIsValid()) return null;
+
+            var result = await reference.AssetGUID.LoadReferenceAsync<GameDataCategory>(lifeTime, lifeTime.Token);
+            if (!result.Success)
+            {
+                Debug.LogError($"Game DB: category {reference.AssetGUID} load failed: {result.Error}");
+                return null;
+            }
+
+            return result.Result as GameDataCategory;
         }
 
         public IGameDataCategory GetCategory(string category)
         {
-            _categoriesMap.TryGetValue(category, out var value);
+            _categoriesMap.TryGetValue(category ?? string.Empty, out var value);
             return value;
         }
-        
+
         public bool IsValidResourceSource(string resource, Type resourceType)
         {
+            return true;
+        }
+
+        /// <summary>exact id lookup: O(1)</summary>
+        public bool TryGetRecord(string id, out IGameDataCategory category, out IGameResourceRecord record)
+        {
+            category = null;
+            record = null;
+            if (string.IsNullOrEmpty(id) || !_index.TryGetValue(id, out var value)) return false;
+            category = value.category;
+            record = value.resource;
             return true;
         }
 
@@ -104,205 +163,161 @@ namespace Game.Code.DataBase.Runtime
             return await LoadSourceAsync<Object>(resourceId, lifeTime);
         }
 
-        public async UniTask<GameResourceResult<TAsset>> LoadAsync<TAsset>(string resourceId,ILifeTime lifeTime)
+        public async UniTask<GameResourceResult<TAsset>> LoadAsync<TAsset>(string resourceId, ILifeTime lifeTime)
         {
             var assetResult = await LoadSourceAsync<TAsset>(resourceId, lifeTime);
-            
-            var resultAsset = default(TAsset);
-            
-            if (assetResult.Result is TAsset asset)
-                resultAsset = asset;
-            
-            var result = new GameResourceResult<TAsset>()
-            {
-                Id = resourceId,
-                Complete = assetResult.Complete,
-                Error = assetResult.Error,
-                Result = resultAsset,
-                Exception = assetResult.Exception,
-            };
-
-            return result;
+            return ToTyped<TAsset>(resourceId, assetResult);
         }
-        
+
         public async UniTask<GameResourceResult<TAsset>> LoadAsync<TAsset>(
             string resourceId,
-            GameDbResource record, 
+            GameDbResource record,
             ILifeTime lifeTime) where TAsset : class
         {
-            var resource = record.resource;
-            var category = record.category;
-            var provider = category.ResourceProvider;
-            
-            var loadFallBack = resource == EmptyRecord.Value || provider == null;
-            
-            var assetResult = loadFallBack
-                ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
-                : await provider.LoadAsync<TAsset>(resource.Id,lifeTime);
-
-#if UNITY_EDITOR
-
-            if (assetResult.Complete == false)
-            {
-                Debug.LogError($"Load resource failed: {resourceId} " +
-                               $"from category: {category.Category} " +
-                               $"with error: {assetResult.Error}");
-            }
-            
-#endif
-            
-            var resultAsset = default(TAsset);
-            if (assetResult.Result is TAsset asset)
-                resultAsset = asset;
-            
-            var result = new GameResourceResult<TAsset>()
-            {
-                Id = resourceId,
-                Complete = assetResult.Complete,
-                Error = assetResult.Error,
-                Result = resultAsset,
-                Exception = assetResult.Exception,
-            };
-
-            return result;
+            var assetResult = await LoadRecordAsync<TAsset>(resourceId, record, lifeTime);
+            return ToTyped<TAsset>(resourceId, assetResult);
         }
 
-        public async UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, 
-            ILifeTime lifeTime)
+        public async UniTask<GameResourceResult[]> LoadAllAsync<TResult>(string resource, ILifeTime lifeTime)
         {
             var resources = FindAll(resource);
-            var tasks = resources
-                .Select(x => LoadSourceAsync<TResult>(resource,lifeTime));
-            var results = await UniTask.WhenAll(tasks);
-            return results;
+            var tasks = new UniTask<GameResourceResult>[resources.Length];
+            for (var i = 0; i < resources.Length; i++)
+                tasks[i] = LoadRecordAsync<TResult>(resources[i].resource.Id, resources[i], lifeTime);
+            return await UniTask.WhenAll(tasks);
         }
 
+        /// <summary>every category's matches for the filter (exact id, name or label)</summary>
         public GameDbResource[] FindAll(string filter)
         {
-            if(_dbResourcesCache.TryGetValue(filter, out var value))
-                return value;
+            if (string.IsNullOrEmpty(filter)) return Array.Empty<GameDbResource>();
 
-            _dbCacheResources.Clear();
-            
-            var result = Array.Empty<GameDbResource>();
-            
+            var result = new List<GameDbResource>();
             foreach (var category in _categories)
             {
-                var record = category.Find(filter);
-                if(record == EmptyRecord.Value || string.IsNullOrEmpty(record.Id))
-                    continue;
-                
-                var item = new GameDbResource()
+                var records = category.FindResources(filter);
+                for (var i = 0; i < records.Count; i++)
                 {
-                    filter = filter,
-                    success = true,
-                    category = category,
-                    resource = record
-                };
-                
-                _dbCacheResources.Add(item);
-                
-                break;
+                    var record = records[i];
+                    if (record == null || record == EmptyRecord.Value || string.IsNullOrEmpty(record.Id)) continue;
+                    result.Add(new GameDbResource()
+                    {
+                        filter = filter,
+                        success = true,
+                        category = category,
+                        resource = record,
+                    });
+                }
             }
 
-            result = _dbCacheResources.Count <= 0
-                ? result
-                : _dbCacheResources.ToArray();
-            
-            _dbResourcesCache[filter] =  result;
-            
-            return result;
+            return result.ToArray();
         }
 
+        /// <summary>exact id (O(1)) first, then the legacy name / label filter of each category</summary>
         public GameDbResource Find(string filter)
         {
-            if(_dbResourceCache.TryGetValue(filter, out var value))
-                return value;
+            if (!string.IsNullOrEmpty(filter) && _index.TryGetValue(filter, out var exact))
+                return exact;
 
-            var result =  new GameDbResource()
+            var result = new GameDbResource()
             {
                 success = false,
                 filter = filter,
                 category = null,
                 resource = EmptyRecord.Value
             };
-            
+
+            if (string.IsNullOrEmpty(filter)) return result;
+
             foreach (var category in _categories)
             {
                 var record = category.Find(filter);
-                
-                if(record == null || 
-                   record == EmptyRecord.Value || 
-                   string.IsNullOrEmpty(record.Id)) continue;
-                
-                result = new GameDbResource()
+
+                if (record == null ||
+                    record == EmptyRecord.Value ||
+                    string.IsNullOrEmpty(record.Id)) continue;
+
+                return new GameDbResource()
                 {
                     filter = filter,
                     success = true,
                     category = category,
                     resource = record
                 };
-                
-                break;
             }
 
-            _dbResourceCache[filter] = result;
-            
             return result;
         }
 
-                
-        public async UniTask<GameResourceResult> LoadSourceAsync<TAsset>(string resourceId,ILifeTime lifeTime)
+        public async UniTask<GameResourceResult> LoadSourceAsync<TAsset>(string resourceId, ILifeTime lifeTime)
         {
-            resourceId = resourceId.TrimEnd(' ');
-            
-            var record = Find(resourceId);
-            
+            resourceId = resourceId?.TrimEnd(' ');
+            return await LoadRecordAsync<TAsset>(resourceId, Find(resourceId), lifeTime);
+        }
+
+        private async UniTask<GameResourceResult> LoadRecordAsync<TAsset>(
+            string resourceId,
+            GameDbResource record,
+            ILifeTime lifeTime)
+        {
             var resource = record.resource;
             var category = record.category;
-            var resourcePath = resource.ResourcePath;
             var provider = category?.ResourceProvider;
-            
-            var loadFallBack = !record.success || 
-                               resource == EmptyRecord.Value || 
-                               provider == null;
-            
-            var assetResult = loadFallBack
-                ? await LoadFallbackResourceAsync<TAsset>(resourceId,lifeTime) 
-                : await provider.LoadAsync<TAsset>(resourcePath,lifeTime);
-            
-#if UNITY_EDITOR
 
+            var loadFallBack = !record.success ||
+                               resource == null ||
+                               resource == EmptyRecord.Value ||
+                               provider == null;
+
+            //G3: the provider loads the record's resource path, not its id
+            var assetResult = loadFallBack
+                ? await LoadFallbackResourceAsync<TAsset>(resourceId, lifeTime)
+                : await provider.LoadAsync<TAsset>(resource.ResourcePath, lifeTime);
+
+#if UNITY_EDITOR
             if (assetResult.Complete == false)
             {
                 Debug.LogError($"Load resource failed: {resourceId} " +
-                               $"from category: {category.Category} " +
+                               $"from category: {category?.Category ?? "<fallback>"} " +
                                $"with error: {assetResult.Error}");
             }
-            
 #endif
-           
             return assetResult;
         }
-        
-        
+
         private async UniTask<GameResourceResult> LoadFallbackResourceAsync<TAsset>(
             string resourceId,
             ILifeTime lifeTime)
         {
             foreach (var resourceLocation in _fallBackLocations)
             {
-                if(!resourceLocation.IsValidResourceSource(resourceId,typeof(TAsset)))
+                if (resourceLocation == null || !resourceLocation.IsValidResourceSource(resourceId, typeof(TAsset)))
                     continue;
-                
-                var resource = await resourceLocation.LoadAsync<TAsset>(resourceId,lifeTime);
-                if(!resource.Complete) continue;
+
+                var resource = await resourceLocation.LoadAsync<TAsset>(resourceId, lifeTime);
+                if (!resource.Complete) continue;
                 return resource;
             }
-            
+
             return GameResourceResult.FailedResourceResult;
         }
-        
+
+        private static GameResourceResult<TAsset> ToTyped<TAsset>(string resourceId, GameResourceResult assetResult)
+        {
+            var resultAsset = default(TAsset);
+            if (assetResult.Result is TAsset asset)
+                resultAsset = asset;
+
+            return new GameResourceResult<TAsset>()
+            {
+                Id = resourceId,
+                Complete = assetResult.Complete,
+                Error = assetResult.Error,
+                Result = resultAsset,
+                Exception = assetResult.Exception,
+            };
+        }
+
         [Serializable]
         public struct GameDbResource
         {
@@ -315,6 +330,9 @@ namespace Game.Code.DataBase.Runtime
         public void Dispose()
         {
             _lifeTime.Terminate();
+            _index.Clear();
+            _categories.Clear();
+            _categoriesMap.Clear();
         }
     }
 
@@ -334,19 +352,17 @@ namespace Game.Code.DataBase.Runtime
         public int id;
         public string category;
         public string recordId;
-        
+
         public bool IsMatch(string searchString)
         {
             if (string.IsNullOrEmpty(searchString))
                 return true;
-            
-            if(id.ToStringFromCache().Contains(searchString, StringComparison.OrdinalIgnoreCase))
+
+            if (id.ToStringFromCache().Contains(searchString, StringComparison.OrdinalIgnoreCase))
                 return true;
-            
+
             return recordId.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
                    category.Contains(searchString, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
-
-

@@ -10,26 +10,30 @@ namespace UniGame.GameDB
     using UnityEngine;
     using UnityEngine.AddressableAssets;
 
+    /// <summary>
+    /// Bootstrap source of the game database. The database asset is an AssetReference (serialized as
+    /// <c>_dataBaseAsset</c>, the schema of the project's existing source asset); the database is initialized with the
+    /// context lifetime and published as <see cref="IGameDatabase"/>.
+    /// </summary>
     [CreateAssetMenu(menuName = "UniGame/Game DB/Game DB Source", fileName = "Game DB Source")]
-    public class GameDataServiceSource : DataSourceAsset<IGameDatabase>
+    public class GameDataServiceSource : DataSourceAsset<IGameDataService>
     {
-        public GameDataBaseAsset dataBaseAsset;
+        public AssetReferenceT<GameDataBaseAsset> _dataBaseAsset;
 
-        protected sealed override async UniTask<IGameDatabase> CreateInternalAsync(IContext context)
+        protected sealed override async UniTask<IGameDataService> CreateInternalAsync(IContext context)
         {
-            var lifeTime = context.LifeTime;
-            var dbAsset = Instantiate(dataBaseAsset);
+            var databaseAsset = await _dataBaseAsset
+                .LoadAssetTaskAsync(context.LifeTime)
+                .ToSharedInstanceAsync();
 
-            var database = await dbAsset
+            var database = await databaseAsset
                 .gameDatabase
-                .Initialize();
+                .Initialize(context.LifeTime);
 
-            dbAsset.DestroyWith(lifeTime);
-            database.AddTo(lifeTime);
-            
+            database.AddTo(context.LifeTime);
             context.Publish<IGameDatabase>(database);
 
-            return database;
+            return new GameDataService();
         }
     }
 }
