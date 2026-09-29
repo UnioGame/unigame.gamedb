@@ -27,5 +27,8 @@ namespace UniGame.GameDb.Runtime
         }
 
         IGameDataCategory GetCategory(string category) => null;
+
+        /// <summary>the categories loaded into the registry, in serialized order (empty for fakes)</summary>
+        System.Collections.Generic.IReadOnlyList<IGameDataCategory> Categories => System.Array.Empty<IGameDataCategory>();
     }
 }
